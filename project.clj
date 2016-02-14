@@ -6,9 +6,15 @@
 
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/clojurescript "0.0-3297"]
-                 [org.clojure/core.async "0.1.346.0-17112a-alpha"]
+                 [org.clojure/core.async "0.2.371" :scope "test"]
                  [garden "1.2.5"]
-                 [rum "0.2.7"]]
+                 [jayq "2.5.4"]
+                 [rum "0.2.7"]
+                 ;[figwheel-sidecar "0.5.0-6" :scope "test"]
+                 ]
+  :min-lein-version "2.0.0"
+
+  :uberjar-name "clojure-rum-simple-standalone.jar"
 
   :plugins [[lein-cljsbuild "1.0.5"]
             [lein-figwheel "0.3.5"]
@@ -17,6 +23,8 @@
   :source-paths ["src"]
 
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
+
+  :main rum-simple.core
 
   :cljsbuild {
     :builds [{:id "dev"

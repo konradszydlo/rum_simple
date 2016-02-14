@@ -1,6 +1,7 @@
 (ns ^:figwheel-always rum-simple.core
     (:require ; [rum :include-macros true]
-             [rum] ))
+      [jayq.core :as jq]
+      [rum] ))
 
 (enable-console-print!)
 
@@ -174,13 +175,68 @@
       (make-service serv))
     (total-para)]])
 
+;cursored mixin
+(def state-cursor (atom {:app {:settings {:header {:color "#cc3333" }}}}))
+
+(defn toggle-cursor-colour []
+  (.log js/console "in toggle cursor")
+  (if (= "#cc3333" (get-in state-cursor [:app :settings :header :color]))
+    (do
+      (.log js/console "if")
+      (swap! state-cursor assoc-in [:app :settings :header :color] "#cc56bb"))
+    (do
+      (.log js/console "else")
+      (swap! state-cursor assoc-in [:app :settings :header :color] "#0011cc"))
+
+    )
+  )
+;(swap! state-cursor assoc-in [:app :settings :header :color] "#cc56bb")
+
+
+(rum/defc cursor-label < rum/cursored [color text]
+          [:.label {:style {:color @color}} text])
+
+(rum/defc cursor-labels < rum/cursored rum/cursored-watch [state]
+          [:div
+           (cursor-label (rum/cursor state-cursor [:app :settings :header :color]) "Cursor label text")
+           [:button {:on-click toggle-cursor-colour} "Tooggle cursor"]])
+
+
+;; scrolling mixin
+
+(defn set-scroll-top! [pos]
+  (when pos
+  ;(.log js/console "kony")
+    (.scrollTop (js/$ js/window) pos)))
+
+(defn scroll-view [v]
+  {:init           (fn [state props]
+                     (assoc state ::with-scroll-view true))
+   :did-mount      (fn [state]
+                     (if-not (::scrolled state)
+                       (do
+                         (set-scroll-top! v)
+                         (assoc state ::scrolled true))
+                       state))
+   :transfer-state (fn [old new]
+                     (assoc new ::scrolled (::scrolled old)
+                                ::with-scroll-view true))})
+
+(rum/defc scrolling-component < (scroll-view 100) []
+          [:div
+           [:span "Scrolling component"]])
+
+
 (defn mount-components []
   (rum/mount (label 5 "abcd") (el "label-component"))
   (rum/mount (stateful "Clicks count") (el "click-counter"))
   (rum/mount (timer) (el "detailed-timer"))
   (rum/mount (reactive-timer) (el "reactive-timer"))
   (rum/mount (reactive-search) (el "library-search"))
-  (rum/mount (service-chooser) (el "order-form")))
+  (rum/mount (service-chooser) (el "order-form"))
+  (rum/mount (cursor-labels) (el "cursor-labels"))
+  (rum/mount (scrolling-component) (el "scrolling"))
+)
 
 (defn on-js-reload []
   (mount-components))
