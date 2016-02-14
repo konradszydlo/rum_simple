@@ -174,11 +174,15 @@
       (make-service serv))
     (total-para)]])
 
-(defn on-js-reload []
+(defn mount-components []
   (rum/mount (label 5 "abcd") (el "label-component"))
   (rum/mount (stateful "Clicks count") (el "click-counter"))
   (rum/mount (timer) (el "detailed-timer"))
   (rum/mount (reactive-timer) (el "reactive-timer"))
   (rum/mount (reactive-search) (el "library-search"))
-  (rum/mount (service-chooser) (el "order-form"))
-  )
+  (rum/mount (service-chooser) (el "order-form")))
+
+(defn on-js-reload []
+  (mount-components))
+
+(mount-components)
